@@ -3,6 +3,9 @@
 
 import crypto from 'crypto';
 
+// 如果 FirstLine API 使用自簽憑證，允許跳過憑證驗證
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 // SurveyCake question_id for LINE UID
 const QUESTION_ID = 'aka_contactable_user_id';
 
@@ -19,7 +22,7 @@ export default async function handler(req, res) {
     return res.status(405).end('Method Not Allowed');
   }
 
-  // 驗證簽名
+  // 驗證 SurveyCake 簽名
   const secret = process.env.SURVEYCAKE_SECRET;
   if (secret) {
     const signature = req.headers['x-surveycake-signature'];
@@ -39,7 +42,7 @@ export default async function handler(req, res) {
   const surveyTags = Array.isArray(payload.tags) ? payload.tags : [];
 
   try {
-    // 查詢聯絡人
+    // 1. 查詢聯絡人
     const contactRes = await fetch(
       `https://api.firstline.cc/api/v1/contact?line_uid=${encodeURIComponent(lineUid)}`,
       { headers: { Authorization: `Bearer ${process.env.FIRSTLINE_API_KEY}` } }
@@ -56,7 +59,7 @@ export default async function handler(req, res) {
     }
     const contactId = contacts[0].id;
 
-    // 取標籤列表
+    // 2. 取標籤列表
     const tagsRes = await fetch(
       'https://api.firstline.cc/api/v1/tag',
       { headers: { Authorization: `Bearer ${process.env.FIRSTLINE_API_KEY}` } }
@@ -69,7 +72,7 @@ export default async function handler(req, res) {
     const allTags = await tagsRes.json();
     const matchedTagIds = allTags.filter(t => surveyTags.includes(t.name)).map(t => t.id);
 
-    // 更新標籤
+    // 3. 更新標籤
     const updateRes = await fetch(
       `https://api.firstline.cc/api/v1/contact/${contactId}`,
       {
