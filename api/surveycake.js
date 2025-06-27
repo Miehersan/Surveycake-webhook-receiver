@@ -3,6 +3,9 @@
 
 import crypto from 'crypto';
 
+// 如果 FirstLine API 使用自簽憑證，允許跳過憑證驗證
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 // SurveyCake question_id for LINE UID
 const QUESTION_ID = 'aka_contactable_user_id';
 
