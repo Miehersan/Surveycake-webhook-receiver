@@ -7,6 +7,16 @@ import crypto from 'crypto';
 const QUESTION_ID = 'aka_contactable_user_id';
 
 export default async function handler(req, res) {
+  // === CORS 設定，允許瀏覽器測試 ===
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-SurveyCake-Signature');
+
+  // 處理預檢 (OPTIONS) 請求
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     return res.status(405).end('Method Not Allowed');
@@ -27,7 +37,10 @@ export default async function handler(req, res) {
   // 2. Extract LINE UID and SurveyCake tags
   const payload = req.body;
   const ans = payload.answers.find(a => a.question_id === QUESTION_ID);
-  if (!ans) return res.status(400).json({ error: 'Missing LINE UID' });
+  if (!ans) {
+    console.error('Missing LINE UID question');
+    return res.status(400).json({ error: 'Missing LINE UID' });
+  }
   const lineUid = ans.value;
   const surveyTags = Array.isArray(payload.tags) ? payload.tags : [];
 
