@@ -3,7 +3,7 @@
 
 import crypto from 'crypto';
 
-// Allow self-signed certificates from FirstLine API if necessary
+// 如果 FirstLine API 使用自簽憑證，允許跳過驗證（DEPTH_ZERO_SELF_SIGNED_CERT）
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 // SurveyCake question_id for LINE UID
@@ -20,12 +20,13 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
+  // 僅允許 POST
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     return res.status(405).end('Method Not Allowed');
   }
 
-  // 1. 驗證 SurveyCake 簽名（若有設定）
+  // 1. 驗證 SurveyCake 簽名（若有設定 SURVEYCAKE_SECRET）
   const secret = process.env.SURVEYCAKE_SECRET;
   if (secret) {
     const signature = req.headers['x-surveycake-signature'];
