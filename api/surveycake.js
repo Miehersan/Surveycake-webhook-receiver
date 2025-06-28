@@ -2,6 +2,7 @@
 // Deploy to Vercel and set FIRSTLINE_API_KEY and SURVEYCAKE_SECRET in env vars
 
 import crypto from 'crypto';
+import { fetch } from 'undici';
 
 // SurveyCake question_id for LINE UID
 tconst QUESTION_ID = 'aka_contactable_user_id';
