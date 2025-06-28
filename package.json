@@ -1,0 +1,12 @@
+{
+  "name": "surveycake-webhook-receiver",
+  "version": "1.0.0",
+  "description": "Vercel Function to receive SurveyCake webhooks and update FirstLine contact tags",
+  "type": "module",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "undici": "^5.22.0"
+  }
+}
