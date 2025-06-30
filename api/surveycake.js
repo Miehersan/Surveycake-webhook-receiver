@@ -5,7 +5,7 @@ import crypto from 'crypto';
 import { fetch } from 'undici';
 
 // SurveyCake question_id for LINE UID
-tconst QUESTION_ID = 'aka_contactable_user_id';
+const QUESTION_ID = 'aka_contactable_user_id';
 
 export default async function handler(req, res) {
   // === CORS 設定 ===
