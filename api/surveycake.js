@@ -79,7 +79,7 @@ export default async function handler(req, res) {
 
     // 3. 更新標籤
     const updateRes = await fetch(
-      `https://api.firstline.cc/v1/contact/${contactId}`,
+      `https://api.firstline.cc/api/v1/contact/${contactId}`,
       {
         method: 'PUT',
         headers: {
