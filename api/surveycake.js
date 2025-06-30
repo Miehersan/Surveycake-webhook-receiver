@@ -49,7 +49,7 @@ export default async function handler(req, res) {
   try {
     // 1. 查詢聯絡人
     const contactRes = await fetch(
-      `https://api.firstline.cc/v1/contact?line_uid=${encodeURIComponent(lineUid)}`,
+      `https://api.firstline.cc/api/v1/contact?line_uid=${encodeURIComponent(lineUid)}`,
       { headers: { Authorization: `Bearer ${process.env.FIRSTLINE_API_KEY}` }, dispatcher: agent }
     );
     if (!contactRes.ok) {
@@ -66,7 +66,7 @@ export default async function handler(req, res) {
 
     // 2. 取標籤列表
     const tagsRes = await fetch(
-      'https://api.firstline.cc/v1/tag',
+      'https://api.firstline.cc/api/v1/tag',
       { headers: { Authorization: `Bearer ${process.env.FIRSTLINE_API_KEY}` }, dispatcher: agent }
     );
     if (!tagsRes.ok) {
