@@ -2,7 +2,14 @@
 // Deploy to Vercel and set FIRSTLINE_API_KEY and SURVEYCAKE_SECRET in env vars
 
 import crypto from 'crypto';
-import { fetch } from 'undici';
+import { fetch, Agent } from 'undici';
+
+// Create an Agent that allows self-signed certificates
+const agent = new Agent({
+  connect: {
+    rejectUnauthorized: false
+  }
+});
 
 // SurveyCake question_id for LINE UID
 const QUESTION_ID = 'aka_contactable_user_id';
@@ -40,10 +47,10 @@ export default async function handler(req, res) {
   const surveyTags = Array.isArray(payload.tags) ? payload.tags : [];
 
   try {
-    // 1. 查詢聯絡人 (API 路徑使用 /api/v1/contact)
+    // 1. 查詢聯絡人
     const contactRes = await fetch(
       `https://api.firstline.cc/api/v1/contact?line_uid=${encodeURIComponent(lineUid)}`,
-      { headers: { Authorization: `Bearer ${process.env.FIRSTLINE_API_KEY}` } }
+      { headers: { Authorization: `Bearer ${process.env.FIRSTLINE_API_KEY}` }, dispatcher: agent }
     );
     if (!contactRes.ok) {
       const text = await contactRes.text();
@@ -57,10 +64,10 @@ export default async function handler(req, res) {
     }
     const contactId = contacts[0].id;
 
-    // 2. 取標籤列表 (API 路徑使用 /api/v1/tag)
+    // 2. 取標籤列表
     const tagsRes = await fetch(
       'https://api.firstline.cc/api/v1/tag',
-      { headers: { Authorization: `Bearer ${process.env.FIRSTLINE_API_KEY}` } }
+      { headers: { Authorization: `Bearer ${process.env.FIRSTLINE_API_KEY}` }, dispatcher: agent }
     );
     if (!tagsRes.ok) {
       const text = await tagsRes.text();
@@ -70,7 +77,7 @@ export default async function handler(req, res) {
     const allTags = await tagsRes.json();
     const matchedTagIds = allTags.filter(t => surveyTags.includes(t.name)).map(t => t.id);
 
-    // 3. 更新標籤 (API 路徑使用 /api/v1/contact/{id})
+    // 3. 更新標籤
     const updateRes = await fetch(
       `https://api.firstline.cc/api/v1/contact/${contactId}`,
       {
@@ -79,7 +86,8 @@ export default async function handler(req, res) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.FIRSTLINE_API_KEY}`
         },
-        body: JSON.stringify({ tag_ids: matchedTagIds })
+        body: JSON.stringify({ tag_ids: matchedTagIds }),
+        dispatcher: agent
       }
     );
     if (!updateRes.ok) {
